@@ -1,6 +1,9 @@
 package ru.pestrikov.springapp.config;
 
+import org.springframework.web.filter.HiddenHttpMethodFilter;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
+
+import javax.servlet.ServletContext;
 
 public class AppConfig extends AbstractAnnotationConfigDispatcherServletInitializer {
     @Override
@@ -14,9 +17,13 @@ public class AppConfig extends AbstractAnnotationConfigDispatcherServletInitiali
                 WebConfig.class
         };
     }
-
     @Override
     protected String[] getServletMappings() {
         return new String[]{"/"};
+    }
+
+    private void registerHiddenFieldFilter(ServletContext aContext) {
+        aContext.addFilter("hiddenHttpMethodFilter",
+                new HiddenHttpMethodFilter()).addMappingForUrlPatterns(null ,true, "/*");
     }
 }

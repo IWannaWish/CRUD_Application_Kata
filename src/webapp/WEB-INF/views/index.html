@@ -1,21 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
     <meta charset="UTF-8">
     <title>All Users</title>
 </head>
 <body>
-<table>
-    <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Email</th>
-    </tr>
-    <tr th:each="user: ${users}">
-        <td th:text="${user.id}"></td>
-        <td th:text="${user.name}"></td>
-        <td th:text="${user.email}"></td>
-    </tr>
-</table>
+<div th:each = "user : ${users}">
+    <a th:href="@{'/users?id=' + ${user.getId()}}" th:text="${user.getName()}">user</a>
+</div>
+
+<br/>
+<hr/>
+<a href="new">Create new user</a>
 </body>
 </html>
