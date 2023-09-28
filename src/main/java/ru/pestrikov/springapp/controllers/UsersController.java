@@ -5,8 +5,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.pestrikov.springapp.model.User;
 import ru.pestrikov.springapp.service.UserService;
+
+import javax.servlet.http.HttpServletRequest;
 
 @Controller
 @RequestMapping
@@ -15,8 +18,8 @@ public class UsersController {
     private final UserService userService;
 
     @Autowired
-    public UsersController(UserService userService){
-        this.userService=userService;
+    public UsersController(UserService userService) {
+        this.userService = userService;
     }
 
     @GetMapping(value = "/")
@@ -50,18 +53,16 @@ public class UsersController {
     }
 
 
-    @PatchMapping()
+    @PostMapping("/update")
     public String update(@ModelAttribute("user") User user,
                          @RequestParam("id") int id) {
         userService.update(id, user);
         return "redirect:http://localhost:8080/";
     }
 
-
-    @DeleteMapping("/")
-    public String delete(@RequestParam("id") int id) {
+    @GetMapping("/delete")
+    public String deleteUser(@RequestParam(value = "id") int id) {
         userService.delete(id);
         return "redirect:http://localhost:8080/";
     }
-
 }
