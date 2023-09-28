@@ -1,5 +1,6 @@
 package ru.pestrikov.springapp.config;
 
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.core.env.Environment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -7,9 +8,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.orm.hibernate5.HibernateTransactionManager;
-import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.JpaVendorAdapter;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -19,20 +21,20 @@ import org.thymeleaf.spring5.SpringTemplateEngine;
 import org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver;
 import org.thymeleaf.spring5.view.ThymeleafViewResolver;
 
+import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 @Configuration
 @ComponentScan("ru.pestrikov.springapp")
 @EnableWebMvc
-@PropertySource("classpath:hibernate.properties")
 @EnableTransactionManagement
+@PropertySource("classpath:db.properties")
 public class SpringConfig implements WebMvcConfigurer {
 
-
-
     private final ApplicationContext applicationContext;
-
     private final Environment env;
 
     @Autowired
@@ -64,46 +66,52 @@ public class SpringConfig implements WebMvcConfigurer {
         ThymeleafViewResolver resolver = new ThymeleafViewResolver();
         resolver.setTemplateEngine(templateEngine());
         resolver.setCharacterEncoding("UTF-8");
-
         registry.viewResolver(resolver);
     }
 
+
     @Bean
-    public DataSource dataSource() {
-        DriverManagerDataSource dataSource = new DriverManagerDataSource();
-
-        dataSource.setDriverClassName(env.getRequiredProperty("hibernate.driver_class"));
-        dataSource.setUrl(env.getRequiredProperty("hibernate.connection.url"));
-        dataSource.setUsername(env.getRequiredProperty("hibernate.connection.username"));
-        dataSource.setPassword(env.getRequiredProperty("hibernate.connection.password"));
-
-        return dataSource;
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory(){ //Get Entity Manager
+        JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
+        LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
+        em.setDataSource(dataSource());
+        em.setPackagesToScan("ru.pestrikov.springapp.model");
+        em.setJpaVendorAdapter(vendorAdapter);
+        em.setJpaProperties(hibernateProperties());
+        return em;
     }
-
-
-
-    private Properties hibernateProperties() {
+    @Bean
+    public Properties hibernateProperties() {
         Properties properties = new Properties();
-        properties.put("hibernate.dialect", env.getRequiredProperty("hibernate.dialect"));
-        properties.put("hibernate.show_sql", env.getRequiredProperty("hibernate.show_sql"));
-
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("hibernate.properties");
+        try {
+            properties.load(inputStream);
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Can't find properties", e);
+        }
         return properties;
     }
 
-    @Bean
-    public LocalSessionFactoryBean sessionFactory() {
-        LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
-        sessionFactory.setDataSource(dataSource());
-        sessionFactory.setPackagesToScan("ru.pestrikov.springapp.model");
-        sessionFactory.setHibernateProperties(hibernateProperties());
 
-        return sessionFactory;
+
+    @Bean
+    public DataSource dataSource() {
+        BasicDataSource ds = new BasicDataSource();
+        ds.setUrl(env.getRequiredProperty("connection.url"));
+        ds.setDriverClassName(env.getRequiredProperty("driver_class"));
+        ds.setUsername(env.getRequiredProperty("connection.username"));
+        ds.setPassword(env.getRequiredProperty("connection.password"));
+        return ds;
     }
 
     @Bean
-    public PlatformTransactionManager hibernateTransactionManager() {
-        HibernateTransactionManager transactionManager = new HibernateTransactionManager();
-        transactionManager.setSessionFactory(sessionFactory().getObject());
-
+    public PlatformTransactionManager transactionManager(EntityManagerFactory emf) {
+        JpaTransactionManager transactionManager = new JpaTransactionManager();
+        transactionManager.setEntityManagerFactory(emf);
         return transactionManager;
-    }}
+    }
+
+
+}
+
+

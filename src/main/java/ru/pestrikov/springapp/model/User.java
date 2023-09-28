@@ -1,7 +1,6 @@
 package ru.pestrikov.springapp.model;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -19,6 +18,6 @@ public class User {
     @Column()
     private String name;
 
-    @Column
+    @Column()
     private String email;
 }

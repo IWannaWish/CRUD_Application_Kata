@@ -5,35 +5,29 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import ru.pestrikov.springapp.dao.UserDao;
-import ru.pestrikov.springapp.dao.UserDaoImpl;
 import ru.pestrikov.springapp.model.User;
+import ru.pestrikov.springapp.service.UserService;
 
 @Controller
 @RequestMapping
 public class UsersController {
 
-    private final UserDao userDao;
+    private final UserService userService;
 
     @Autowired
-    public UsersController(UserDao userDao){
-        this.userDao=userDao;
+    public UsersController(UserService userService){
+        this.userService=userService;
     }
 
     @GetMapping(value = "/")
     public String index(Model model) {
-        //get all users from dao
-        //and give all user to view
-
-        model.addAttribute("users", userDao.index());
+        model.addAttribute("users", userService.index());
         return "index";
     }
 
     @GetMapping("/users")
     public String show(@RequestParam("id") int id, Model model) {
-        //get int from url param
-        //get 1 user from dao and give to view
-        model.addAttribute("users", userDao.show(id));
+        model.addAttribute("users", userService.show(id));
         return "show";
     }
 
@@ -45,13 +39,13 @@ public class UsersController {
 
     @PostMapping()
     public String create(@ModelAttribute("user") User user) {
-        userDao.save(user);
+        userService.save(user);
         return "redirect:http://localhost:8080/";
     }
 
     @GetMapping("/edit")
     public String edit(Model model, @RequestParam("id") int id) {
-        model.addAttribute("user", userDao.show(id));
+        model.addAttribute("user", userService.show(id));
         return "edit";
     }
 
@@ -59,14 +53,14 @@ public class UsersController {
     @PatchMapping()
     public String update(@ModelAttribute("user") User user,
                          @RequestParam("id") int id) {
-        userDao.update(id, user);
+        userService.update(id, user);
         return "redirect:http://localhost:8080/";
     }
 
 
     @DeleteMapping("/")
     public String delete(@RequestParam("id") int id) {
-        userDao.delete(id);
+        userService.delete(id);
         return "redirect:http://localhost:8080/";
     }
 
