@@ -1,38 +1,60 @@
 package ru.pestrikov.springapp.dao;
 
-import org.springframework.stereotype.Component;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import ru.pestrikov.springapp.model.User;
 
-import java.util.ArrayList;
 import java.util.List;
 
-@Component
-public class UserDaoImpl implements UserDao{
-    ArrayList<User> list = new ArrayList<>();
+@Repository
+public class UserDaoImpl implements UserDao {
+
+    private final SessionFactory sessionFactory;
+
+    @Autowired
+    public UserDaoImpl(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
+    }
+
+    @Transactional(readOnly = true)
     @Override
     public List<User> index() {
-        list.add(new User(1, "Andrei", "mail@gmail"));
-        return list;
+        Session session = sessionFactory.getCurrentSession();
+        return session.createQuery("select u from User u", User.class)
+                .getResultList();
     }
 
+    @Transactional(readOnly = true)
     @Override
     public User show(int id) {
-        return new User(1, "Andrei", "gmail");
+        Session session = sessionFactory.getCurrentSession();
+        return session.get(User.class, id);
     }
 
+    @Transactional
     @Override
     public void save(User user) {
-        user.setId(2);
-        list.add(user);
+        Session session = sessionFactory.getCurrentSession();
+        session.save(user);
     }
 
+    @Transactional
     @Override
     public void delete(int id) {
-        list.get(1).setName("DELETE");
+        Session session = sessionFactory.getCurrentSession();
+        session.remove(session.get(User.class, id));
     }
 
+    @Transactional
     @Override
     public void update(int id, User user) {
-        user.setName("Update!");
+        Session session = sessionFactory.getCurrentSession();
+        User userToBeUpdated = session.get(User.class, id);
+
+        userToBeUpdated.setName(user.getName());
+        userToBeUpdated.setEmail(user.getEmail());
     }
 }

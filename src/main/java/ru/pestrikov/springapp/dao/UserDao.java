@@ -4,7 +4,7 @@ import ru.pestrikov.springapp.model.User;
 
 import java.util.List;
 
-interface UserDao {
+public interface UserDao {
     List<User> index();
     User show(int id);
     void save(User user);

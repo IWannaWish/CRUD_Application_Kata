@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import ru.pestrikov.springapp.dao.UserDao;
 import ru.pestrikov.springapp.dao.UserDaoImpl;
 import ru.pestrikov.springapp.model.User;
 
@@ -11,11 +13,11 @@ import ru.pestrikov.springapp.model.User;
 @RequestMapping
 public class UsersController {
 
-    private UserDaoImpl userDao;
+    private final UserDao userDao;
 
     @Autowired
-    public void setUserDao(UserDaoImpl userDao) {
-        this.userDao = userDao;
+    public UsersController(UserDao userDao){
+        this.userDao=userDao;
     }
 
     @GetMapping(value = "/")
@@ -28,10 +30,9 @@ public class UsersController {
     }
 
     @GetMapping("/users")
-    public String show(@RequestParam("id") int id, Model model) { //get int from url param
-
+    public String show(@RequestParam("id") int id, Model model) {
+        //get int from url param
         //get 1 user from dao and give to view
-
         model.addAttribute("users", userDao.show(id));
         return "show";
     }
@@ -62,9 +63,11 @@ public class UsersController {
         return "redirect:http://localhost:8080/";
     }
 
-    @DeleteMapping("/{id}")
-    public String delete(@RequestParam int id) {
+
+    @DeleteMapping("/")
+    public String delete(@RequestParam("id") int id) {
         userDao.delete(id);
         return "redirect:http://localhost:8080/";
     }
+
 }
