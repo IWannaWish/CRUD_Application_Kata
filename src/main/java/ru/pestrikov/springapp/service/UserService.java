@@ -5,7 +5,7 @@ import ru.pestrikov.springapp.model.User;
 import java.util.List;
 
 public interface UserService {
-    List<User> index();
+    List<User> getAllUser();
     User show(int id);
     void save(User user);
     void delete(int id);

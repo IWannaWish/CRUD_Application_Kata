@@ -29,17 +29,17 @@ public class HibernateConfig {
         this.env = env;
     }
     @Bean
-    public LocalContainerEntityManagerFactoryBean entityManagerFactory(){ //Get Entity Manager
+    public LocalContainerEntityManagerFactoryBean getEntityManagerFactory(){
         JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
-        em.setDataSource(dataSource());
+        em.setDataSource(getDataSource());
         em.setPackagesToScan("ru.pestrikov.springapp.model");
         em.setJpaVendorAdapter(vendorAdapter);
-        em.setJpaProperties(hibernateProperties());
+        em.setJpaProperties(getHibernateProperties());
         return em;
     }
     @Bean
-    public Properties hibernateProperties() {
+    public Properties getHibernateProperties() {
         Properties properties = new Properties();
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream("hibernate.properties");
         try {
@@ -51,7 +51,7 @@ public class HibernateConfig {
     }
 
     @Bean
-    public DataSource dataSource() {
+    public DataSource getDataSource() {
         BasicDataSource ds = new BasicDataSource();
         ds.setUrl(env.getRequiredProperty("connection.url"));
         ds.setDriverClassName(env.getRequiredProperty("driver_class"));
@@ -61,7 +61,7 @@ public class HibernateConfig {
     }
 
     @Bean
-    public PlatformTransactionManager transactionManager(EntityManagerFactory emf) {
+    public PlatformTransactionManager getTransactionManager(EntityManagerFactory emf) {
         JpaTransactionManager transactionManager = new JpaTransactionManager();
         transactionManager.setEntityManagerFactory(emf);
         return transactionManager;

@@ -5,11 +5,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.pestrikov.springapp.model.User;
 import ru.pestrikov.springapp.service.UserService;
 
-import javax.servlet.http.HttpServletRequest;
 
 @Controller
 @RequestMapping
@@ -23,39 +21,39 @@ public class UsersController {
     }
 
     @GetMapping(value = "/")
-    public String index(Model model) {
-        model.addAttribute("users", userService.index());
+    public String getStartPage(Model model) {
+        model.addAttribute("users", userService.getAllUser());
         return "index";
     }
 
     @GetMapping("/users")
-    public String show(@RequestParam("id") int id, Model model) {
+    public String getUserPage(@RequestParam("id") int id, Model model) {
         model.addAttribute("users", userService.show(id));
         return "show";
     }
 
     @GetMapping("/new")
-    public String newUser(Model model) {
+    public String getNewUserPage(Model model) {
         model.addAttribute("user", new User());
         return "new";
     }
 
     @PostMapping()
-    public String create(@ModelAttribute("user") User user) {
+    public String createUser(@ModelAttribute("user") User user) {
         userService.save(user);
         return "redirect:http://localhost:8080/";
     }
 
     @GetMapping("/edit")
-    public String edit(Model model, @RequestParam("id") int id) {
+    public String getEditUserPage(Model model, @RequestParam("id") int id) {
         model.addAttribute("user", userService.show(id));
         return "edit";
     }
 
 
     @PostMapping("/update")
-    public String update(@ModelAttribute("user") User user,
-                         @RequestParam("id") int id) {
+    public String updateUser(@ModelAttribute("user") User user,
+                             @RequestParam("id") int id) {
         userService.update(id, user);
         return "redirect:http://localhost:8080/";
     }
